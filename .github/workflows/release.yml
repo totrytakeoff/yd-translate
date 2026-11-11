@@ -3,12 +3,18 @@ name: Release
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: '要发布的已有 tag（例如 v0.1.0）'
+        required: true
 
 permissions:
   contents: write
 
 env:
   CARGO_TERM_COLOR: always
+  RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
 
 jobs:
   linux:
@@ -16,6 +22,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RELEASE_TAG }}
 
       - uses: dtolnay/rust-toolchain@stable
 
@@ -32,7 +40,7 @@ jobs:
 
       - name: Package tarball
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
+          VERSION="${RELEASE_TAG#v}"
           mkdir -p dist/linux
           cp target/release/yd target/release/yd-gui dist/linux/
           cp packaging/common/yd-gui.desktop packaging/common/yd-gui.png dist/linux/
@@ -41,7 +49,7 @@ jobs:
             yd yd-gui yd-gui.desktop yd-gui.png LICENSE README.md
 
       - name: Build deb
-        run: ./packaging/deb/build-deb.sh "${GITHUB_REF_NAME#v}"
+        run: ./packaging/deb/build-deb.sh "${RELEASE_TAG#v}"
 
       - uses: actions/upload-artifact@v4
         with:
@@ -55,6 +63,8 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RELEASE_TAG }}
 
       - uses: dtolnay/rust-toolchain@stable
 
@@ -66,7 +76,7 @@ jobs:
       - name: Package
         shell: pwsh
         run: |
-          $version = "${{ github.ref_name }}".TrimStart('v')
+          $version = "${{ env.RELEASE_TAG }}".TrimStart('v')
           New-Item -ItemType Directory -Force dist/windows | Out-Null
           Copy-Item target/release/yd.exe dist/windows/
           Copy-Item target/release/yd-gui.exe dist/windows/
@@ -83,6 +93,8 @@ jobs:
     runs-on: macos-15-intel
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RELEASE_TAG }}
 
       - uses: dtolnay/rust-toolchain@stable
 
@@ -93,7 +105,7 @@ jobs:
 
       - name: Package
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
+          VERSION="${RELEASE_TAG#v}"
           mkdir -p dist/macos
           cp target/release/yd target/release/yd-gui dist/macos/
           cp LICENSE README.md dist/macos/
@@ -114,15 +126,20 @@ jobs:
         with:
           path: artifacts
 
-      - name: Create GitHub release
+      - name: Create or update GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" \
-            --repo "$GITHUB_REPOSITORY" \
-            --title "yd-translate $GITHUB_REF_NAME" \
-            --generate-notes \
-            artifacts/linux/* artifacts/windows/* artifacts/macos/*
+          FILES="artifacts/linux/* artifacts/windows/* artifacts/macos/*"
+          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --clobber $FILES
+          else
+            gh release create "$RELEASE_TAG" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "yd-translate $RELEASE_TAG" \
+              --generate-notes \
+              $FILES
+          fi
 
   aur:
     name: Update AUR (yd-translate-bin)
@@ -132,6 +149,8 @@ jobs:
       AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RELEASE_TAG }}
 
       - name: AUR secret not configured
         if: env.AUR_SSH_PRIVATE_KEY == ''
@@ -140,8 +159,8 @@ jobs:
       - name: Update PKGBUILD version and checksum
         if: env.AUR_SSH_PRIVATE_KEY != ''
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
-          URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/yd-translate-${VERSION}-linux-x86_64.tar.gz"
+          VERSION="${RELEASE_TAG#v}"
+          URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${RELEASE_TAG}/yd-translate-${VERSION}-linux-x86_64.tar.gz"
           curl -fsSL -o /tmp/pkg.tar.gz "$URL"
           SHA="$(sha256sum /tmp/pkg.tar.gz | cut -d' ' -f1)"
           sed -i "s/^pkgver=.*/pkgver=${VERSION}/" packaging/aur/PKGBUILD
@@ -156,4 +175,4 @@ jobs:
           commit_username: totrytakeoff
           commit_email: totrytakeoff@users.noreply.github.com
           ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
-          commit_message: "Update to ${{ github.ref_name }}"
+          commit_message: "Update to ${{ env.RELEASE_TAG }}"
