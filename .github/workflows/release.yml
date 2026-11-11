@@ -79,8 +79,8 @@ jobs:
           path: dist/*.zip
 
   macos:
-    name: macOS (arm64)
-    runs-on: macos-14
+    name: macOS (x86_64)
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
 
@@ -97,7 +97,7 @@ jobs:
           mkdir -p dist/macos
           cp target/release/yd target/release/yd-gui dist/macos/
           cp LICENSE README.md dist/macos/
-          tar -C dist/macos -czf "dist/yd-translate-${VERSION}-macos-aarch64.tar.gz" \
+          tar -C dist/macos -czf "dist/yd-translate-${VERSION}-macos-x86_64.tar.gz" \
             yd yd-gui LICENSE README.md
 
       - uses: actions/upload-artifact@v4
