@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>yd</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <header data-tauri-drag-region>
+      <div class="brand" data-tauri-drag-region>
+        <span class="dot"></span>
+        <span class="title">有道翻译</span>
+      </div>
+      <div class="actions" data-tauri-drag-region>
+        <button id="dir" class="pill">EN → 中</button>
+        <button id="ocr-btn" class="pill" title="从图片识别并翻译">OCR</button>
+        <button id="settings-btn" class="pill" title="设置凭证">设置</button>
+      </div>
+    </header>
+
+    <div id="main-view">
+      <div class="input-wrap">
+        <textarea id="input" rows="2" autofocus spellcheck="false"
+          placeholder="输入单词或句子…  Enter 翻译 / Shift+Enter 换行"></textarea>
+      </div>
+      <main id="result" class="result"></main>
+      <footer>
+        <span id="meta" class="meta"></span>
+        <div class="footer-actions">
+          <button id="speak" class="ghost">朗读</button>
+          <button id="copy" class="ghost">复制</button>
+        </div>
+      </footer>
+    </div>
+
+    <section id="settings" class="settings" hidden>
+      <h2>有道智云凭证</h2>
+
+      <label class="field">应用 ID
+        <input id="app-key" autocomplete="off" spellcheck="false" placeholder="16 位应用ID">
+      </label>
+
+      <label class="field">应用密钥
+        <input id="app-secret" type="password" autocomplete="off" spellcheck="false" placeholder="32 位应用密钥">
+      </label>
+
+      <div class="settings-actions">
+        <button id="save-settings" class="primary">保存并校验</button>
+        <button id="toggle-secret" class="ghost">显示密钥</button>
+        <button id="close-settings" class="ghost">返回</button>
+      </div>
+
+      <div id="settings-status" class="status"></div>
+
+      <p class="settings-hint">不填也能用：单词查词典（音标 / 释义 / 例句），整句会回落到 Bing。</p>
+      <p class="settings-path" id="config-path"></p>
+    </section>
+    <section id="ocr-view" class="ocr-view" hidden>
+      <div class="ocr-head">
+        <h2>图片翻译</h2>
+        <button id="close-ocr" class="ghost">返回</button>
+      </div>
+
+      <div id="drop-zone" class="drop-zone" tabindex="0" contenteditable="true" spellcheck="false">
+        <div class="drop-main">粘贴 / 拖入图片，或点击选择</div>
+        <div class="drop-sub">Ctrl+V 粘贴剪贴板图片 · PNG / JPG / BMP</div>
+      </div>
+
+      <div class="ocr-actions">
+        <button id="paste-btn" class="ghost">从剪贴板粘贴</button>
+      </div>
+
+      <div id="ocr-status" class="status"></div>
+
+      <div id="ocr-preview" class="ocr-preview" hidden>
+        <img id="ocr-thumb" alt="预览">
+      </div>
+    </section>
+
+  </div>
+  <input id="ocr-file" type="file" accept="image/png,image/jpeg,image/bmp,image/webp" hidden>
+  <script src="app.js"></script>
+</body>
+</html>

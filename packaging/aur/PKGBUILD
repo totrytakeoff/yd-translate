@@ -1,0 +1,23 @@
+# Maintainer: totrytakeoff <totrytakeoff@users.noreply.github.com>
+pkgname=yd-translate-bin
+pkgver=0.1.0
+pkgrel=1
+pkgdesc='有道翻译命令行与浮动窗（预编译二进制）'
+arch=('x86_64')
+url='https://github.com/totrytakeoff/yd-translate'
+license=('MIT')
+depends=('gtk3' 'webkit2gtk-4.1')
+provides=('yd-translate' 'yd' 'yd-gui')
+conflicts=('yd-translate')
+options=('!strip')
+source=("$pkgname-$pkgver.tar.gz::$url/releases/download/v$pkgver/yd-translate-$pkgver-linux-x86_64.tar.gz")
+sha256sums=('SKIP')
+
+package() {
+  install -Dm755 "$srcdir/yd" "$pkgdir/usr/bin/yd"
+  install -Dm755 "$srcdir/yd-gui" "$pkgdir/usr/bin/yd-gui"
+  install -Dm644 "$srcdir/yd-gui.desktop" "$pkgdir/usr/share/applications/yd-gui.desktop"
+  install -Dm644 "$srcdir/yd-gui.png" "$pkgdir/usr/share/icons/hicolor/512x512/apps/yd-gui.png"
+  install -Dm644 "$srcdir/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  install -Dm644 "$srcdir/README.md" "$pkgdir/usr/share/doc/$pkgname/README.md"
+}

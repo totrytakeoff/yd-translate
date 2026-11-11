@@ -1,0 +1,18 @@
+pkgbase = yd-translate-bin
+	pkgdesc = 有道翻译命令行与浮动窗（预编译二进制）
+	pkgver = 0.1.0
+	pkgrel = 1
+	url = https://github.com/totrytakeoff/yd-translate
+	arch = x86_64
+	license = MIT
+	depends = gtk3
+	depends = webkit2gtk-4.1
+	provides = yd-translate
+	provides = yd
+	provides = yd-gui
+	conflicts = yd-translate
+	options = !strip
+	source = yd-translate-bin-0.1.0.tar.gz::https://github.com/totrytakeoff/yd-translate/releases/download/v0.1.0/yd-translate-0.1.0-linux-x86_64.tar.gz
+	sha256sums = SKIP
+
+pkgname = yd-translate-bin

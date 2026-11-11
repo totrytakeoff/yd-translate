@@ -1,0 +1,10 @@
+/target
+/dist
+/packaging/deb/stage
+*.deb
+*.AppImage
+node_modules/
+.DS_Store
+
+# Tauri 生成文件
+yd-gui/src-tauri/gen/

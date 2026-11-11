@@ -1,0 +1,16 @@
+[Desktop Entry]
+Type=Application
+Name=yd 有道翻译
+Name[zh_CN]=yd 有道翻译
+Name[en]=yd Translate
+GenericName=Translation
+GenericName[zh_CN]=翻译
+Comment=单词与整句翻译浮动窗
+Exec=yd-gui
+TryExec=yd-gui
+Icon=yd-gui
+Terminal=false
+Categories=Utility;
+Keywords=translate;dictionary;翻译;词典;
+StartupNotify=false
+StartupWMClass=yd-gui
