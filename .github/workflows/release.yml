@@ -130,11 +130,15 @@ jobs:
     runs-on: ubuntu-24.04
     env:
       AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
-    if: ${{ env.AUR_SSH_PRIVATE_KEY != '' }}
     steps:
       - uses: actions/checkout@v4
 
+      - name: AUR secret not configured
+        if: env.AUR_SSH_PRIVATE_KEY == ''
+        run: echo "AUR_SSH_PRIVATE_KEY 未配置，跳过 AUR 发布"
+
       - name: Update PKGBUILD version and checksum
+        if: env.AUR_SSH_PRIVATE_KEY != ''
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
           URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/yd-translate-${VERSION}-linux-x86_64.tar.gz"
@@ -145,6 +149,7 @@ jobs:
           grep -E '^(pkgver|sha256sums)' packaging/aur/PKGBUILD
 
       - uses: KSXGitHub/github-actions-deploy-aur@v3.0.1
+        if: env.AUR_SSH_PRIVATE_KEY != ''
         with:
           pkgname: yd-translate-bin
           pkgbuild: packaging/aur/PKGBUILD
